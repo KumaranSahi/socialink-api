@@ -29,7 +29,7 @@ const signupUser = async (req, res) => {
       email: email,
       password: newPassword,
       image: image,
-      DOB: DOB,
+      DOB: new Date(DOB),
     });
     if (data) {
       return res.status(201).json({
@@ -98,6 +98,7 @@ const signinUser = async (req, res) => {
         userName: user.name,
         image: user.image,
         isAdmin: user.isAdmin,
+        userId:user._id
       },
     });
   } catch (error) {
