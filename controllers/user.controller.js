@@ -30,6 +30,7 @@ const signupUser = async (req, res) => {
       password: newPassword,
       image: image,
       DOB: new Date(DOB),
+      privacy: false,
     });
     if (data) {
       return res.status(201).json({
@@ -97,8 +98,9 @@ const signinUser = async (req, res) => {
         }),
         userName: user.name,
         image: user.image,
-        isAdmin: user.isAdmin,
-        userId:user._id
+        userId: user._id,
+        bio: user.bio,
+        privacy: user.privacy,
       },
     });
   } catch (error) {
@@ -110,4 +112,43 @@ const signinUser = async (req, res) => {
   }
 };
 
-module.exports = { signinUser, changePassword, signupUser };
+const editUser = async (req, res) => {
+  const user = req.user;
+  const { name, bio, password, privacy } = req.body;
+  try {
+    if (password) {
+      const newPassword = await hashingPasswords(password);
+      await user.update({
+        name: name,
+        bio: bio,
+        password: newPassword,
+        privacy: privacy,
+      });
+    } else {
+      await user.update({
+        name: name,
+        bio: bio,
+        privacy: privacy,
+      });
+    }
+    await user.save();
+    const newUser = await User.findById(user._id);
+    return res.status(201).json({
+      message: "User details updated",
+      ok: true,
+      data: {
+        name: newUser.name,
+        bio: newUser.bio,
+        privacy: newUser.privacy,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to edit user please try again later",
+    });
+  }
+};
+
+module.exports = { signinUser, changePassword, signupUser, editUser };

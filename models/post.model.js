@@ -6,14 +6,13 @@ const postSchema = new Schema(
       type: String,
       required: true,
     },
-    image:{
-        type:String,
+    image: {
+      type: String,
     },
-    by:{
-        type:Schema.Types.ObjectId,
-        ref:"User"
-    }
-
+    by: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );

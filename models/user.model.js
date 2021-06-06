@@ -21,6 +21,18 @@ const userSchema = new Schema(
     DOB: {
       type: Date,
     },
+    post: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    bio:{
+      type:String
+    },
+    privacy:{
+      type:Boolean
+    }
   },
   { timestamps: true }
 );
