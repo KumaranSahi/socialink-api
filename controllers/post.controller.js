@@ -1,13 +1,27 @@
 const { Post } = require("../models");
 
-// const getAllPosts = async (req, res) => {
-//     try{
-
-//     }catch(error){
-
-//     }
-
-// };
+const getUserPosts = async (req, res) => {
+  const user = req.user;
+  try {
+    const populatedUser = await user.execPopulate("posts");
+    return res.status(200).json({
+      ok: true,
+      message: "Have your posts",
+      data: populatedUser.posts.map(({ content, image, createdAt, _id }) => ({
+        content,
+        image,
+        createdAt,
+        postId: _id,
+      })),
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to load user posts",
+    });
+  }
+};
 
 const createPost = async (req, res) => {
   const user = req.user;
@@ -18,7 +32,7 @@ const createPost = async (req, res) => {
       image: image,
       by: user._id,
     });
-    user.post.push(newPost._id);
+    user.posts.push(newPost._id);
     user.save();
     return res.status(201).json({
       ok: true,
@@ -27,6 +41,7 @@ const createPost = async (req, res) => {
         content: newPost.content,
         image: newPost.image,
         postId: newPost._id,
+        createdAt: newPost.createdAt,
       },
     });
   } catch (error) {
@@ -42,7 +57,7 @@ const deletePost = async (req, res) => {
   const user = req.user;
   const post = req.post;
   try {
-    await user.update({ $pull: { post: post._id } });
+    await user.update({ $pull: { posts: post._id } });
     await user.save();
     await post.remove();
     return res.status(201).json({
@@ -58,4 +73,4 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, deletePost };
+module.exports = { createPost, deletePost, getUserPosts };

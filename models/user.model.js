@@ -21,7 +21,7 @@ const userSchema = new Schema(
     DOB: {
       type: Date,
     },
-    post: [
+    posts: [
       {
         type: Schema.Types.ObjectId,
         ref: "Post",

@@ -24,6 +24,11 @@ router.put(
 
 //Post Routes
 
+router.get(
+  "/posts/user-posts",
+  passport.authenticate("jwt", { session: false }),
+  postController.getUserPosts
+);
 router.post(
   "/posts",
   passport.authenticate("jwt", { session: false }),
