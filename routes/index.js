@@ -10,6 +10,7 @@ const postMiddleware = require("../middleware/post.middleware");
 
 const userController = require("../controllers/user.controller");
 const postController = require("../controllers/post.controller");
+const friendController = require("../controllers/friend.controller");
 
 //User routes
 
@@ -39,6 +40,14 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   postMiddleware,
   postController.deletePost
+);
+
+//Friend Routes
+
+router.get(
+  "/friends/top-users",
+  passport.authenticate("jwt", { session: false }),
+  friendController.getTopUsers
 );
 
 module.exports = router;
