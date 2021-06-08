@@ -9,15 +9,12 @@ const friendSchema = new Schema(
     to: {
       type: Schema.Types.ObjectId,
       ref: "User",
-    },accepted:{
-        type:Boolean
-    }
+    },
   },
   {
     timestamps: true,
   }
 );
-
 
 const Friend = model("Friend", friendSchema);
 module.exports = Friend;

@@ -27,12 +27,30 @@ const userSchema = new Schema(
         ref: "Post",
       },
     ],
-    bio:{
-      type:String
+    bio: {
+      type: String,
     },
-    privacy:{
-      type:Boolean
-    }
+    privacy: {
+      type: Boolean,
+    },
+    sentRequests: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Friend",
+      },
+    ],
+    recievedRequests: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Friend",
+      },
+    ],
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

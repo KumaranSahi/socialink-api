@@ -1,4 +1,4 @@
-const Post = require("../models/post.model");
+const {Post} = require("../models");
 
 const postMiddleware = async (req, res, next) => {
   try {

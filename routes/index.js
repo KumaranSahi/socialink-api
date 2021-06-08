@@ -5,6 +5,7 @@ const passport = require("passport");
 //middlewares
 
 const postMiddleware = require("../middleware/post.middleware");
+const requestMiddleware = require("../middleware/request.middleware");
 
 //controller
 
@@ -48,6 +49,26 @@ router.get(
   "/friends/top-users",
   passport.authenticate("jwt", { session: false }),
   friendController.getTopUsers
+);
+
+router.post(
+  "/friends/send-request",
+  passport.authenticate("jwt", { session: false }),
+  friendController.sendFriendRequest
+);
+
+router.put(
+  "/friends/:requestId",
+  passport.authenticate("jwt", { session: false }),
+  requestMiddleware,
+  friendController.acceptFriendRequest
+);
+
+router.delete(
+  "/friends/:requestId",
+  passport.authenticate("jwt", { session: false }),
+  requestMiddleware,
+  friendController.deleteFriendRequest
 );
 
 module.exports = router;

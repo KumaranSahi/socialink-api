@@ -101,6 +101,7 @@ const signinUser = async (req, res) => {
         userId: user._id,
         bio: user.bio,
         privacy: user.privacy,
+        requests: user.recievedRequests,
       },
     });
   } catch (error) {
