@@ -46,6 +46,12 @@ router.post(
 //Friend Routes
 
 router.get(
+  "/friends/requests",
+  passport.authenticate("jwt", { session: false }),
+  friendController.getUserRequests
+);
+
+router.get(
   "/friends/top-users",
   passport.authenticate("jwt", { session: false }),
   friendController.getTopUsers

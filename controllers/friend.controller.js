@@ -6,7 +6,17 @@ const getTopUsers = async (req, res) => {
     const userRequests = await Friend.find({
       from: user._id,
     });
-    const userList = userRequests.map(({ to }) => to);
+    const recievedRequests = await Friend.find({
+      to: user._id,
+    });
+    let userList = [];
+    userRequests.forEach(({ to }) => {
+      userList.push(to);
+    });
+    recievedRequests.forEach(({ from }) => {
+      userList.push(from);
+    });
+
     const users = await User.find({ _id: { $nin: userList } })
       .sort({ posts: -1 })
       .limit(10);
@@ -63,9 +73,9 @@ const sendFriendRequest = async (req, res) => {
 const deleteFriendRequest = async (req, res) => {
   const user = req.user;
   const friendRequest = req.friendRequest;
-  const requesId = req.requestId;
+  const { requestId } = req.params;
   try {
-    await user.pull({ $pull: { sentRequests: friendRequest._id } });
+    await user.update({ $pull: { sentRequests: friendRequest._id } });
     await User.findByIdAndUpdate(friendRequest.to, {
       $pull: { recievedRequests: friendRequest._id },
     });
@@ -73,7 +83,7 @@ const deleteFriendRequest = async (req, res) => {
     return res.status(201).json({
       ok: true,
       message: "Friend Request deleted",
-      data: requesId,
+      data: requestId,
     });
   } catch (error) {
     console.log(error);
@@ -87,6 +97,7 @@ const deleteFriendRequest = async (req, res) => {
 const acceptFriendRequest = async (req, res) => {
   const user = req.user;
   const friendRequest = req.friendRequest;
+  const { requestId } = req.requestId;
   try {
     user.friends.push(friendRequest.from);
     await user.save();
@@ -99,8 +110,10 @@ const acceptFriendRequest = async (req, res) => {
     });
     requestSender.friends.push(friendRequest.to);
     await requestSender;
+    await friendRequest.remove();
     return res.status(200).json({
       ok: true,
+      data: requestId,
       message: "Successfully added friend!",
     });
   } catch (error) {
@@ -112,9 +125,51 @@ const acceptFriendRequest = async (req, res) => {
   }
 };
 
+const getUserRequests = async (req, res) => {
+  const user = req.user;
+  try {
+    const populatedUser = await user.execPopulate([
+      { path: "sentRequests", populate: { path: "to" } },
+      { path: "recievedRequests", populate: { path: "from" } },
+    ]);
+    const sentRequests = populatedUser.sentRequests.map(
+      ({ _id: requestId, to: { _id: userId, name, image } }) => ({
+        requestId: requestId,
+        userId: userId,
+        name: name,
+        image: image,
+      })
+    );
+    const recievedRequests = populatedUser.recievedRequests.map(
+      ({ _id: requestId, from: { _id: userId, name, image } }) => ({
+        requestId: requestId,
+        userId: userId,
+        name: name,
+        image: image,
+      })
+    );
+
+    return res.status(200).json({
+      ok: true,
+      message: "User request",
+      data: {
+        sentRequests: sentRequests,
+        recievedRequests: recievedRequests,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to load user requests",
+    });
+  }
+};
+
 module.exports = {
   getTopUsers,
   sendFriendRequest,
   deleteFriendRequest,
   acceptFriendRequest,
+  getUserRequests,
 };

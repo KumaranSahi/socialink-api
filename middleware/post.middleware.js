@@ -1,8 +1,9 @@
-const {Post} = require("../models");
+const { Post } = require("../models");
 
 const postMiddleware = async (req, res, next) => {
+  const { postId } = req.params;
   try {
-    const post = await Post.findById(req.postId);
+    const post = await Post.findById(postId);
     if (post) {
       req.post = post;
       next();

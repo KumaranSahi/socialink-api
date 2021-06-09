@@ -1,8 +1,9 @@
 const { Friend } = require("../models");
 
 const friendMiddleware = async (req, res, next) => {
+  const { requestId } = req.params;
   try {
-    const friendRequest = await Friend.findById(req.requestId);
+    const friendRequest = await Friend.findById(requestId);
     if (friendRequest) {
       req.friendRequest = friendRequest;
       next();
