@@ -97,19 +97,19 @@ const deleteFriendRequest = async (req, res) => {
 const acceptFriendRequest = async (req, res) => {
   const user = req.user;
   const friendRequest = req.friendRequest;
-  const { requestId } = req.requestId;
+  const { requestId } = req.params;
   try {
     user.friends.push(friendRequest.from);
     await user.save();
     await user.update({
       $pull: { recievedRequests: friendRequest._id },
     });
-    const requestSender = await User.findById(req.from);
+    const requestSender = await User.findById(friendRequest.from);
     await requestSender.update({
       $pull: { sentRequests: friendRequest._id },
     });
     requestSender.friends.push(friendRequest.to);
-    await requestSender;
+    await requestSender.save();
     await friendRequest.remove();
     return res.status(200).json({
       ok: true,
