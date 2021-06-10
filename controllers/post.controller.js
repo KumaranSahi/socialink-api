@@ -1,4 +1,4 @@
-const { Post, User } = require("../models");
+const { Post } = require("../models");
 
 const getFeedPosts = async (req, res) => {
   const user = req.user;
@@ -14,8 +14,8 @@ const getFeedPosts = async (req, res) => {
           userName: name,
           userImage: image,
           postId: postId,
-          postContent: content,
-          postImage: postImage,
+          content: content,
+          image: postImage,
           createdAt: createdAt,
         });
       });
