@@ -1,4 +1,39 @@
-const { Post } = require("../models");
+const { Post, User } = require("../models");
+
+const getFeedPosts = async (req, res) => {
+  const user = req.user;
+  try {
+    const feedPosts = [];
+    const populatedUser = await user.execPopulate({
+      path: "friends",
+      populate: { path: "posts", options: { sort: { createdAt: -1 } } },
+    });
+    populatedUser.friends.forEach(({ name, image, posts }) => {
+      posts.forEach(({ _id: postId, content, image: postImage, createdAt }) => {
+        feedPosts.push({
+          userName: name,
+          userImage: image,
+          postId: postId,
+          postContent: content,
+          postImage: postImage,
+          createdAt: createdAt,
+        });
+      });
+    });
+
+    return res.status(200).json({
+      ok: true,
+      message: "Have some feed posts",
+      data: feedPosts,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to load feed posts",
+    });
+  }
+};
 
 const getUserPosts = async (req, res) => {
   const user = req.user;
@@ -73,4 +108,4 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, deletePost, getUserPosts };
+module.exports = { createPost, deletePost, getUserPosts, getFeedPosts };

@@ -16,6 +16,7 @@ const getTopUsers = async (req, res) => {
     recievedRequests.forEach(({ from }) => {
       userList.push(from);
     });
+    user.friends.forEach((item) => userList.push(item));
 
     const users = await User.find({ _id: { $nin: userList } })
       .sort({ posts: -1 })
