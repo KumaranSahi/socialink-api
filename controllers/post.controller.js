@@ -1,4 +1,4 @@
-const { Post } = require("../models");
+const { Post, Like, User } = require("../models");
 
 const getFeedPosts = async (req, res) => {
   const user = req.user;
@@ -6,19 +6,43 @@ const getFeedPosts = async (req, res) => {
     const feedPosts = [];
     const populatedUser = await user.execPopulate({
       path: "friends",
-      populate: { path: "posts", options: { sort: { createdAt: -1 } } },
+      populate: {
+        path: "posts",
+        options: { sort: { createdAt: -1 } },
+        populate: {
+          path: "likes",
+          options: { sort: { createdAt: -1 } },
+          populate: { path: "by" },
+        },
+      },
     });
     populatedUser.friends.forEach(({ name, image, posts }) => {
-      posts.forEach(({ _id: postId, content, image: postImage, createdAt }) => {
-        feedPosts.push({
-          userName: name,
-          userImage: image,
-          postId: postId,
-          content: content,
-          image: postImage,
-          createdAt: createdAt,
-        });
-      });
+      posts.forEach(
+        ({ _id: postId, content, image: postImage, createdAt, likes }) => {
+          const postLikes = [];
+          likes.forEach(
+            ({
+              _id: likeId,
+              by: { name: likeUserName, image: likeUserImage, _id: likeUserId },
+            }) =>
+              postLikes.push({
+                likeId: likeId,
+                likeUserName: likeUserName,
+                likeUserImage: likeUserImage,
+                likeUserId: likeUserId,
+              })
+          );
+          feedPosts.push({
+            userName: name,
+            userImage: image,
+            postId: postId,
+            content: content,
+            image: postImage,
+            createdAt: createdAt,
+            likes: postLikes,
+          });
+        }
+      );
     });
 
     return res.status(200).json({
@@ -38,16 +62,45 @@ const getFeedPosts = async (req, res) => {
 const getUserPosts = async (req, res) => {
   const user = req.user;
   try {
-    const populatedUser = await user.execPopulate("posts");
+    const populatedUser = await user.execPopulate({
+      path: "posts",
+      options: { sort: { createdAt: -1 } },
+      populate: {
+        path: "likes",
+        options: { sort: { createdAt: -1 } },
+        populate: { path: "by" },
+      },
+    });
+    const userPosts = [];
+    populatedUser.posts.forEach(
+      ({ _id: postId, content, image: postImage, createdAt, likes }) => {
+        const postLikes = [];
+        likes.forEach(
+          ({
+            _id: likeId,
+            by: { name: likeUserName, image: likeUserImage, _id: likeUserId },
+          }) =>
+            postLikes.push({
+              likeId: likeId,
+              likeUserName: likeUserName,
+              likeUserImage: likeUserImage,
+              likeUserId: likeUserId,
+            })
+        );
+        userPosts.push({
+          postId: postId,
+          content: content,
+          image: postImage,
+          createdAt: createdAt,
+          likes: postLikes,
+        });
+      }
+    );
+
     return res.status(200).json({
       ok: true,
       message: "Have your posts",
-      data: populatedUser.posts.map(({ content, image, createdAt, _id }) => ({
-        content,
-        image,
-        createdAt,
-        postId: _id,
-      })),
+      data: userPosts,
     });
   } catch (error) {
     console.log(error);
@@ -92,6 +145,11 @@ const deletePost = async (req, res) => {
   const user = req.user;
   const post = req.post;
   try {
+    post.likes.forEach(async (likeId) => {
+      const like = await Like.findById(likeId);
+      await User.findByIdAndUpdate(like.by, { $pull: { likes: like._id } });
+      await like.remove();
+    });
     await user.update({ $pull: { posts: post._id } });
     await user.save();
     await post.remove();

@@ -27,6 +27,12 @@ const userSchema = new Schema(
         ref: "Post",
       },
     ],
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Like",
+      },
+    ],
     bio: {
       type: String,
     },

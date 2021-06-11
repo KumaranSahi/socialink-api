@@ -6,12 +6,14 @@ const passport = require("passport");
 
 const postMiddleware = require("../middleware/post.middleware");
 const requestMiddleware = require("../middleware/request.middleware");
+const likeMiddleware = require("../middleware/like.middleware");
 
 //controller
 
 const userController = require("../controllers/user.controller");
 const postController = require("../controllers/post.controller");
 const friendController = require("../controllers/friend.controller");
+const likesAndCommentsController = require("../controllers/likeAndComment.controller");
 
 //User routes
 
@@ -81,6 +83,22 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   requestMiddleware,
   friendController.deleteFriendRequest
+);
+
+// Likes Routes
+
+router.put(
+  "/likes/:postId",
+  passport.authenticate("jwt", { session: false }),
+  postMiddleware,
+  likesAndCommentsController.addLike
+);
+
+router.delete(
+  "/likes/:likeId",
+  passport.authenticate("jwt", { session: false }),
+  likeMiddleware,
+  likesAndCommentsController.removeLike
 );
 
 module.exports = router;
