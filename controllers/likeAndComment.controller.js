@@ -57,4 +57,107 @@ const removeLike = async (req, res) => {
   }
 };
 
-module.exports = { addLike, removeLike };
+const addComment = async (req, res) => {
+  const user = req.user;
+  const post = req.post;
+  const { content } = req.body;
+  try {
+    const comment = await Comment.create({
+      content: content,
+      by: user._id,
+      for: post._id,
+    });
+    user.comments.push(comment._id);
+    await user.save();
+    post.comments.push(comment._id);
+    await post.save();
+    return res.status(201).json({
+      ok: true,
+      message: "Comment added to post",
+      data: {
+        comment: {
+          commentId: comment._id,
+          commentContent: comment.content,
+          commentEdited: false,
+          commentUserName: user.name,
+          commentUserImage: user.image,
+          commentUserId: user._id,
+        },
+        postId: post._id,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to add comment ",
+    });
+  }
+};
+
+const editComment = async (req, res) => {
+  const user = req.user;
+  const comment = req.comment;
+  const { content } = req.body;
+  try {
+    await comment.update({
+      content: content,
+      edited: true,
+    });
+    return res.status(201).json({
+      ok: true,
+      message: "Comment has been edited",
+      data: {
+        comment: {
+          commentId: comment._id,
+          commentContent: comment.content,
+          commentEdited: comment.edited,
+          commentUserName: user.name,
+          commentUserImage: user.image,
+          commentUserId: user._id,
+        },
+        postId: comment.for,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to edit comment ",
+    });
+  }
+};
+
+const removeComment = async (req, res) => {
+  const user = req.user;
+  const comment = req.comment;
+  const { commentId } = req.params;
+  try {
+    await user.update({ $pull: { comment: comment._id } });
+    const post = await Post.findById(comment.for);
+    await post.update({ $pull: { comment: comment._id } });
+    await comment.remove();
+    return res.status(201).json({
+      ok: true,
+      message: "Comment has been edited",
+      data: {
+        commentId: commentId,
+        postId: post._id,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to delete comment ",
+    });
+  }
+};
+
+module.exports = {
+  addLike,
+  removeLike,
+  addComment,
+  editComment,
+  removeComment,
+};

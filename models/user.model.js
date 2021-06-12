@@ -33,6 +33,12 @@ const userSchema = new Schema(
         ref: "Like",
       },
     ],
+    comments :[
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
     bio: {
       type: String,
     },

@@ -7,6 +7,7 @@ const passport = require("passport");
 const postMiddleware = require("../middleware/post.middleware");
 const requestMiddleware = require("../middleware/request.middleware");
 const likeMiddleware = require("../middleware/like.middleware");
+const commentMiddleware = require("../middleware/comment.middleware");
 
 //controller
 
@@ -99,6 +100,29 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   likeMiddleware,
   likesAndCommentsController.removeLike
+);
+
+//Comment Routes
+
+router.post(
+  "/comments/:postId",
+  passport.authenticate("jwt", { session: false }),
+  postMiddleware,
+  likesAndCommentsController.addComment
+);
+
+router.put(
+  "/comments/:commentId",
+  passport.authenticate("jwt", { session: false }),
+  commentMiddleware,
+  likesAndCommentsController.editComment
+);
+
+router.delete(
+  "/comments/:commentId",
+  passport.authenticate("jwt", { session: false }),
+  commentMiddleware,
+  likesAndCommentsController.removeComment
 );
 
 module.exports = router;

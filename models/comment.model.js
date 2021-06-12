@@ -5,6 +5,9 @@ const commentSchema = new Schema(
     content: {
       type: String,
     },
+    edited: {
+      type: Boolean,
+    },
     by: {
       type: Schema.Types.ObjectId,
       ref: "User",
