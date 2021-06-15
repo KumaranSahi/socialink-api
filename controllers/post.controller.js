@@ -23,7 +23,7 @@ const getFeedPosts = async (req, res) => {
         ],
       },
     });
-    populatedUser.friends.forEach(({ name, image, posts }) => {
+    populatedUser.friends.forEach(({ _id, name, image, posts }) => {
       posts.forEach(
         ({
           _id: postId,
@@ -32,6 +32,7 @@ const getFeedPosts = async (req, res) => {
           createdAt,
           likes,
           comments,
+          edited,
         }) => {
           const postLikes = [];
           const postComments = [];
@@ -72,12 +73,14 @@ const getFeedPosts = async (req, res) => {
           feedPosts.push({
             userName: name,
             userImage: image,
+            userId: _id,
             postId: postId,
             content: content,
             image: postImage,
             createdAt: createdAt,
             likes: postLikes,
             comments: postComments,
+            postEdited: edited,
           });
         }
       );
@@ -125,6 +128,7 @@ const getUserPosts = async (req, res) => {
         createdAt,
         likes,
         comments,
+        edited,
       }) => {
         const postLikes = [];
         const postComments = [];
@@ -167,6 +171,7 @@ const getUserPosts = async (req, res) => {
           createdAt: createdAt,
           likes: postLikes,
           comments: postComments,
+          postEdited: edited,
         });
       }
     );
@@ -195,7 +200,7 @@ const createPost = async (req, res) => {
       by: user._id,
     });
     user.posts.push(newPost._id);
-    user.save();
+    await user.save();
     return res.status(201).json({
       ok: true,
       message: "New post created",
@@ -218,6 +223,7 @@ const createPost = async (req, res) => {
 const deletePost = async (req, res) => {
   const user = req.user;
   const post = req.post;
+  const { postId } = req.params;
   try {
     post.likes.forEach(async (likeId) => {
       const like = await Like.findById(likeId);
@@ -229,6 +235,7 @@ const deletePost = async (req, res) => {
     await post.remove();
     return res.status(201).json({
       ok: true,
+      data: postId,
       message: "Post has been deleted successfully",
     });
   } catch (error) {
@@ -240,4 +247,35 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, deletePost, getUserPosts, getFeedPosts };
+const editPost = async (req, res) => {
+  const post = req.post;
+  const { content } = req.body;
+  try {
+    await post.update({
+      content: content,
+      edited: true,
+    });
+    return res.status(201).json({
+      message: "Post has been edited successfully",
+      ok: true,
+      data: {
+        content: content,
+        postId: post._id,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to edit post please try again later",
+    });
+  }
+};
+
+module.exports = {
+  createPost,
+  deletePost,
+  getUserPosts,
+  getFeedPosts,
+  editPost,
+};

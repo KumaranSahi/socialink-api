@@ -40,16 +40,25 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   postController.getUserPosts
 );
+
 router.post(
   "/posts",
   passport.authenticate("jwt", { session: false }),
   postController.createPost
 );
-router.post(
+
+router.delete(
   "/posts/:postId",
   passport.authenticate("jwt", { session: false }),
   postMiddleware,
   postController.deletePost
+);
+
+router.put(
+  "/posts/:postId",
+  passport.authenticate("jwt", { session: false }),
+  postMiddleware,
+  postController.editPost
 );
 
 //Friend Routes

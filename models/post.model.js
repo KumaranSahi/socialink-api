@@ -15,7 +15,7 @@ const postSchema = new Schema(
         ref: "Like",
       },
     ],
-    comments :[
+    comments: [
       {
         type: Schema.Types.ObjectId,
         ref: "Comment",
@@ -24,6 +24,9 @@ const postSchema = new Schema(
     by: {
       type: Schema.Types.ObjectId,
       ref: "User",
+    },
+    edited: {
+      type: Boolean,
     },
   },
   { timestamps: true }
