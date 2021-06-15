@@ -9,17 +9,32 @@ const getFeedPosts = async (req, res) => {
       populate: {
         path: "posts",
         options: { sort: { createdAt: -1 } },
-        populate: {
-          path: "likes",
-          options: { sort: { createdAt: -1 } },
-          populate: { path: "by" },
-        },
+        populate: [
+          {
+            path: "likes",
+            options: { sort: { createdAt: -1 } },
+            populate: { path: "by" },
+          },
+          {
+            path: "comments",
+            options: { sort: { createdAt: -1 } },
+            populate: { path: "by" },
+          },
+        ],
       },
     });
     populatedUser.friends.forEach(({ name, image, posts }) => {
       posts.forEach(
-        ({ _id: postId, content, image: postImage, createdAt, likes }) => {
+        ({
+          _id: postId,
+          content,
+          image: postImage,
+          createdAt,
+          likes,
+          comments,
+        }) => {
           const postLikes = [];
+          const postComments = [];
           likes.forEach(
             ({
               _id: likeId,
@@ -32,6 +47,28 @@ const getFeedPosts = async (req, res) => {
                 likeUserId: likeUserId,
               })
           );
+          comments.forEach(
+            ({
+              _id: commentId,
+              content: commentContent,
+              edited: commentEdited,
+              by: {
+                name: commentUserName,
+                image: commentUserImage,
+                _id: commentUserId,
+                createdAt,
+              },
+            }) =>
+              postComments.push({
+                commentId: commentId,
+                commentContent: commentContent,
+                commentUserName: commentUserName,
+                createdAt: createdAt,
+                commentUserImage: commentUserImage,
+                commentUserId: commentUserId,
+                commentEdited: commentEdited,
+              })
+          );
           feedPosts.push({
             userName: name,
             userImage: image,
@@ -40,6 +77,7 @@ const getFeedPosts = async (req, res) => {
             image: postImage,
             createdAt: createdAt,
             likes: postLikes,
+            comments: postComments,
           });
         }
       );
@@ -65,16 +103,31 @@ const getUserPosts = async (req, res) => {
     const populatedUser = await user.execPopulate({
       path: "posts",
       options: { sort: { createdAt: -1 } },
-      populate: {
-        path: "likes",
-        options: { sort: { createdAt: -1 } },
-        populate: { path: "by" },
-      },
+      populate: [
+        {
+          path: "likes",
+          options: { sort: { createdAt: -1 } },
+          populate: { path: "by" },
+        },
+        {
+          path: "comments",
+          options: { sort: { createdAt: -1 } },
+          populate: { path: "by" },
+        },
+      ],
     });
     const userPosts = [];
     populatedUser.posts.forEach(
-      ({ _id: postId, content, image: postImage, createdAt, likes }) => {
+      ({
+        _id: postId,
+        content,
+        image: postImage,
+        createdAt,
+        likes,
+        comments,
+      }) => {
         const postLikes = [];
+        const postComments = [];
         likes.forEach(
           ({
             _id: likeId,
@@ -87,12 +140,33 @@ const getUserPosts = async (req, res) => {
               likeUserId: likeUserId,
             })
         );
+        comments.forEach(
+          ({
+            _id: commentId,
+            content: commentContent,
+            edited: commentEdited,
+            by: {
+              name: commentUserName,
+              image: commentUserImage,
+              _id: commentUserId,
+            },
+          }) =>
+            postComments.push({
+              commentId: commentId,
+              commentContent: commentContent,
+              commentUserName: commentUserName,
+              commentUserImage: commentUserImage,
+              commentUserId: commentUserId,
+              commentEdited: commentEdited,
+            })
+        );
         userPosts.push({
           postId: postId,
           content: content,
           image: postImage,
           createdAt: createdAt,
           likes: postLikes,
+          comments: postComments,
         });
       }
     );

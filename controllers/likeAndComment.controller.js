@@ -79,6 +79,7 @@ const addComment = async (req, res) => {
           commentId: comment._id,
           commentContent: comment.content,
           commentEdited: false,
+          createdAt: comment.createdAt,
           commentUserName: user.name,
           commentUserImage: user.image,
           commentUserId: user._id,
@@ -104,14 +105,16 @@ const editComment = async (req, res) => {
       content: content,
       edited: true,
     });
+    const newComment = await Comment.findById(comment._id);
     return res.status(201).json({
       ok: true,
       message: "Comment has been edited",
       data: {
         comment: {
-          commentId: comment._id,
-          commentContent: comment.content,
-          commentEdited: comment.edited,
+          commentId: newComment._id,
+          commentContent: newComment.content,
+          commentEdited: newComment.edited,
+          createdAt: newComment.createdAt,
           commentUserName: user.name,
           commentUserImage: user.image,
           commentUserId: user._id,
