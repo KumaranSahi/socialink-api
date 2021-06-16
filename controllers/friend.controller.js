@@ -167,10 +167,33 @@ const getUserRequests = async (req, res) => {
   }
 };
 
+const getUserFriends = async (req, res) => {
+  const user = req.user;
+  try {
+    const populatedUser = await user.execPopulate("friends");
+    return res.status(200).json({
+      ok: true,
+      message: "Have some user friends",
+      data: populatedUser.friends.map(({ _id, name, image }) => ({
+        friendId: _id,
+        friendName: name,
+        friendImage: image,
+      })),
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to load user friends",
+    });
+  }
+};
+
 module.exports = {
   getTopUsers,
   sendFriendRequest,
   deleteFriendRequest,
   acceptFriendRequest,
   getUserRequests,
+  getUserFriends,
 };

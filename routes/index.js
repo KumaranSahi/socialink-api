@@ -95,6 +95,12 @@ router.delete(
   friendController.deleteFriendRequest
 );
 
+router.get(
+  "/friends",
+  passport.authenticate("jwt", { session: false }),
+  friendController.getUserFriends
+);
+
 // Likes Routes
 
 router.put(
