@@ -33,7 +33,7 @@ const userSchema = new Schema(
         ref: "Like",
       },
     ],
-    comments :[
+    comments: [
       {
         type: Schema.Types.ObjectId,
         ref: "Comment",
@@ -51,7 +51,7 @@ const userSchema = new Schema(
         ref: "Friend",
       },
     ],
-    recievedRequests: [
+    receivedRequests: [
       {
         type: Schema.Types.ObjectId,
         ref: "Friend",

@@ -1,9 +1,10 @@
 const { Post, Like, User } = require("../models");
+const { getPostContentLikesAndComments } = require("../utils/postUtils");
 
 const getFeedPosts = async (req, res) => {
   const user = req.user;
   try {
-    const feedPosts = [];
+    let feedPosts = [];
     const populatedUser = await user.execPopulate({
       path: "friends",
       populate: {
@@ -24,66 +25,11 @@ const getFeedPosts = async (req, res) => {
       },
     });
     populatedUser.friends.forEach(({ _id, name, image, posts }) => {
-      posts.forEach(
-        ({
-          _id: postId,
-          content,
-          image: postImage,
-          createdAt,
-          likes,
-          comments,
-          edited,
-        }) => {
-          const postLikes = [];
-          const postComments = [];
-          likes.forEach(
-            ({
-              _id: likeId,
-              by: { name: likeUserName, image: likeUserImage, _id: likeUserId },
-            }) =>
-              postLikes.push({
-                likeId: likeId,
-                likeUserName: likeUserName,
-                likeUserImage: likeUserImage,
-                likeUserId: likeUserId,
-              })
-          );
-          comments.forEach(
-            ({
-              _id: commentId,
-              content: commentContent,
-              edited: commentEdited,
-              by: {
-                name: commentUserName,
-                image: commentUserImage,
-                _id: commentUserId,
-                createdAt,
-              },
-            }) =>
-              postComments.push({
-                commentId: commentId,
-                commentContent: commentContent,
-                commentUserName: commentUserName,
-                createdAt: createdAt,
-                commentUserImage: commentUserImage,
-                commentUserId: commentUserId,
-                commentEdited: commentEdited,
-              })
-          );
-          feedPosts.push({
-            userName: name,
-            userImage: image,
-            userId: _id,
-            postId: postId,
-            content: content,
-            image: postImage,
-            createdAt: createdAt,
-            likes: postLikes,
-            comments: postComments,
-            postEdited: edited,
-          });
-        }
-      );
+      feedPosts = getPostContentLikesAndComments(posts, {
+        _id,
+        name,
+        image,
+      });
     });
 
     return res.status(200).json({

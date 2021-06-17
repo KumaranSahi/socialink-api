@@ -101,6 +101,18 @@ router.get(
   friendController.getUserFriends
 );
 
+router.delete(
+  "/friends/unlink/:userId",
+  passport.authenticate("jwt", { session: false }),
+  friendController.unlinkUser
+);
+
+router.get(
+  "/friends/:userId",
+  passport.authenticate("jwt", { session: false }),
+  friendController.getUser
+);
+
 // Likes Routes
 
 router.put(
