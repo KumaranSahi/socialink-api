@@ -1,5 +1,6 @@
 const { Friend, User } = require("../models");
 const { getPostContentLikesAndComments } = require("../utils/postUtils");
+const { formatUserFriends } = require("../utils/friendUtils");
 
 const getTopUsers = async (req, res) => {
   const user = req.user;
@@ -215,32 +216,39 @@ const unlinkUser = async (req, res) => {
 const getUser = async (req, res) => {
   const user = req.user;
   const { userId: requiredUserId } = req.params;
-  const isFriend = user.friends.some((friend) => friend === requiredUserId);
+  const isFriend = user.friends.some(
+    (friend) => friend.toString() === requiredUserId
+  );
   try {
     const requiredUser = await User.findById(requiredUserId);
     let userPosts = [];
-    if (!requiredUser.privacy || isFriend) {
-      const populatedUser = await requiredUser.execPopulate({
-        path: "posts",
-        options: { sort: { createdAt: -1 } },
-        populate: [
-          {
-            path: "likes",
-            options: { sort: { createdAt: -1 } },
-            populate: { path: "by" },
-          },
-          {
-            path: "comments",
-            options: { sort: { createdAt: -1 } },
-            populate: { path: "by" },
-          },
-        ],
-      });
+    let userFriends = [];
+    if (requiredUser.privacy || isFriend) {
+      const populatedUser = await requiredUser.execPopulate([
+        {
+          path: "posts",
+          options: { sort: { createdAt: -1 } },
+          populate: [
+            {
+              path: "likes",
+              options: { sort: { createdAt: -1 } },
+              populate: { path: "by" },
+            },
+            {
+              path: "comments",
+              options: { sort: { createdAt: -1 } },
+              populate: { path: "by" },
+            },
+          ],
+        },
+        { path: "friends" },
+      ]);
       userPosts = getPostContentLikesAndComments(populatedUser.posts, {
         name: populatedUser.name,
         image: populatedUser.image,
         _id: populatedUser._id,
       });
+      userFriends = formatUserFriends(populatedUser.friends);
     }
     if (isFriend) {
       return res.status(200).json({
@@ -252,7 +260,10 @@ const getUser = async (req, res) => {
           foundUserImage: requiredUser.image,
           foundUserBio: requiredUser.bio,
           foundUserPosts: userPosts,
-          foundUserPrivacy:requiredUser.privacy,
+          foundUserPostCount: requiredUser.posts.length,
+          foundUserFriends: userFriends,
+          foundUserFriendsCount: requiredUser.friends.length,
+          foundUserPrivacy: requiredUser.privacy,
           friend: {
             friendStatus: "FRIEND",
           },
@@ -273,6 +284,9 @@ const getUser = async (req, res) => {
           foundUserImage: requiredUser.image,
           foundUserBio: requiredUser.bio,
           foundUserPosts: userPosts,
+          foundUserPostCount: requiredUser.posts.length,
+          foundUserFriends: userFriends,
+          foundUserFriendsCount: requiredUser.friends.length,
           foundUserPrivacy: requiredUser.privacy,
           friend: {
             friendStatus: "SENT_REQUEST_PENDING",
@@ -295,6 +309,9 @@ const getUser = async (req, res) => {
           foundUserImage: requiredUser.image,
           foundUserBio: requiredUser.bio,
           foundUserPosts: userPosts,
+          foundUserPostCount: requiredUser.posts.length,
+          foundUserFriends: userFriends,
+          foundUserFriendsCount: requiredUser.friends.length,
           foundUserPrivacy: requiredUser.privacy,
           friend: {
             friendStatus: "RECEIVED_REQUEST_PENDING",
@@ -312,6 +329,9 @@ const getUser = async (req, res) => {
         foundUserImage: requiredUser.image,
         foundUserBio: requiredUser.bio,
         foundUserPosts: userPosts,
+        foundUserPostCount: requiredUser.posts.length,
+        foundUserFriends: userFriends,
+        foundUserFriendsCount: requiredUser.friends.length,
         foundUserPrivacy: requiredUser.privacy,
         friendStatus: {
           friendStatus: "STRANGER",

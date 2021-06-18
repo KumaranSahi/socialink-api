@@ -63,4 +63,5 @@ const getPostContentLikesAndComments = (posts, { name, image, _id }) => {
   return userPosts;
 };
 
-module.exports = { getPostContentLikesAndComments };
+
+module.exports = { getPostContentLikesAndComments};
