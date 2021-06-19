@@ -223,30 +223,9 @@ const getUser = async (req, res) => {
     const requiredUser = await User.findById(requiredUserId);
     let userPosts = [];
     let userFriends = [];
-    if (requiredUser.privacy || isFriend) {
-      const populatedUser = await requiredUser.execPopulate([
-        {
-          path: "posts",
-          options: { sort: { createdAt: -1 } },
-          populate: [
-            {
-              path: "likes",
-              options: { sort: { createdAt: -1 } },
-              populate: { path: "by" },
-            },
-            {
-              path: "comments",
-              options: { sort: { createdAt: -1 } },
-              populate: { path: "by" },
-            },
-          ],
-        },
-        { path: "friends" },
-      ]);
-      userPosts = getPostContentLikesAndComments(populatedUser.posts, {
-        name: populatedUser.name,
-        image: populatedUser.image,
-        _id: populatedUser._id,
+    if (!requiredUser.privacy || isFriend) {
+      const populatedUser = await requiredUser.execPopulate({
+        path: "friends",
       });
       userFriends = formatUserFriends(populatedUser.friends);
     }
@@ -259,7 +238,6 @@ const getUser = async (req, res) => {
           foundUserName: requiredUser.name,
           foundUserImage: requiredUser.image,
           foundUserBio: requiredUser.bio,
-          foundUserPosts: userPosts,
           foundUserPostCount: requiredUser.posts.length,
           foundUserFriends: userFriends,
           foundUserFriendsCount: requiredUser.friends.length,
@@ -283,7 +261,6 @@ const getUser = async (req, res) => {
           foundUserName: requiredUser.name,
           foundUserImage: requiredUser.image,
           foundUserBio: requiredUser.bio,
-          foundUserPosts: userPosts,
           foundUserPostCount: requiredUser.posts.length,
           foundUserFriends: userFriends,
           foundUserFriendsCount: requiredUser.friends.length,
@@ -308,7 +285,6 @@ const getUser = async (req, res) => {
           foundUserName: requiredUser.name,
           foundUserImage: requiredUser.image,
           foundUserBio: requiredUser.bio,
-          foundUserPosts: userPosts,
           foundUserPostCount: requiredUser.posts.length,
           foundUserFriends: userFriends,
           foundUserFriendsCount: requiredUser.friends.length,
@@ -328,7 +304,6 @@ const getUser = async (req, res) => {
         foundUserName: requiredUser.name,
         foundUserImage: requiredUser.image,
         foundUserBio: requiredUser.bio,
-        foundUserPosts: userPosts,
         foundUserPostCount: requiredUser.posts.length,
         foundUserFriends: userFriends,
         foundUserFriendsCount: requiredUser.friends.length,

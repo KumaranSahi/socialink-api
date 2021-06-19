@@ -61,6 +61,12 @@ router.put(
   postController.editPost
 );
 
+router.get(
+  "/posts/:userId",
+  passport.authenticate("jwt", { session: false }),
+  postController.getLoadedUserPosts
+);
+
 //Friend Routes
 
 router.get(

@@ -218,10 +218,51 @@ const editPost = async (req, res) => {
   }
 };
 
+const getLoadedUserPosts = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const loadedUser = await User.findById(userId);
+    const populatedLoadedUser = await loadedUser.execPopulate({
+      path: "posts",
+      options: { sort: { createdAt: -1 } },
+      populate: [
+        {
+          path: "likes",
+          options: { sort: { createdAt: -1 } },
+        },
+        {
+          path: "comments",
+          options: { sort: { createdAt: -1 } },
+        },
+      ],
+    });
+    const userPosts = getPostContentLikesAndComments(
+      populatedLoadedUser.posts,
+      {
+        _id: populatedLoadedUser._id,
+        name: populatedLoadedUser.name,
+        image: populatedLoadedUser.image,
+      }
+    );
+    return res.status(200).json({
+      ok: true,
+      message: "Have some user posts",
+      data: userPosts,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to load user posts please try again later",
+    });
+  }
+};
+
 module.exports = {
   createPost,
   deletePost,
   getUserPosts,
   getFeedPosts,
   editPost,
+  getLoadedUserPosts,
 };
