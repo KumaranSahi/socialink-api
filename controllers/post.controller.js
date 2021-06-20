@@ -25,11 +25,14 @@ const getFeedPosts = async (req, res) => {
       },
     });
     populatedUser.friends.forEach(({ _id, name, image, posts }) => {
-      feedPosts = getPostContentLikesAndComments(posts, {
-        _id,
-        name,
-        image,
-      });
+      feedPosts = [
+        ...feedPosts,
+        ...getPostContentLikesAndComments(posts, {
+          _id,
+          name,
+          image,
+        }),
+      ];
     });
 
     return res.status(200).json({
