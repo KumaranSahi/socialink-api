@@ -221,7 +221,6 @@ const getUser = async (req, res) => {
   );
   try {
     const requiredUser = await User.findById(requiredUserId);
-    let userPosts = [];
     let userFriends = [];
     if (!requiredUser.privacy || isFriend) {
       const populatedUser = await requiredUser.execPopulate({
