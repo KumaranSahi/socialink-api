@@ -5,4 +5,11 @@ const formatUserFriends = (friends) =>
     friendImage: image,
   }));
 
-  module.exports={formatUserFriends }
+const formatSearchUser = (users) =>
+  users.map(({ _id, name, image }) => ({
+    searchUserId: _id,
+    searchUserName: name,
+    searchUserImage: image,
+  }));
+
+module.exports = { formatUserFriends, formatSearchUser };

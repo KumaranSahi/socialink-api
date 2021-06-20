@@ -5,13 +5,12 @@ const mongoose = require("mongoose");
 //   useUnifiedTopology: true,
 // });
 
-mongoose.connect(
-  'mongodb://localhost/socialink',
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+mongoose.connect("mongodb://localhost/socialink", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true,
+});
 
 const db = mongoose.connection;
 

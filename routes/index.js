@@ -119,6 +119,12 @@ router.get(
   friendController.getUser
 );
 
+router.get(
+  "/friends/search/:userToSearch",
+  passport.authenticate("jwt", { session: false }),
+  friendController.searchUser
+);
+
 // Likes Routes
 
 router.put(

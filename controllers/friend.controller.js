@@ -1,6 +1,5 @@
 const { Friend, User } = require("../models");
-const { getPostContentLikesAndComments } = require("../utils/postUtils");
-const { formatUserFriends } = require("../utils/friendUtils");
+const { formatUserFriends, formatSearchUser } = require("../utils/friendUtils");
 
 const getTopUsers = async (req, res) => {
   const user = req.user;
@@ -176,11 +175,7 @@ const getUserFriends = async (req, res) => {
     return res.status(200).json({
       ok: true,
       message: "Have some user friends",
-      data: populatedUser.friends.map(({ _id, name, image }) => ({
-        friendId: _id,
-        friendName: name,
-        friendImage: image,
-      })),
+      data: formatUserFriends(populatedUser.friends),
     });
   } catch (error) {
     console.log(error);
@@ -321,6 +316,30 @@ const getUser = async (req, res) => {
   }
 };
 
+const searchUser = async (req, res) => {
+  const { userToSearch } = req.params;
+  const user = req.user;
+  try {
+    const searchResults = await User.find(
+      {
+        name: { $regex: userToSearch, $options: "i" },
+        _id: { $ne: user._id } ,
+      },
+    ).sort({ posts: -1 });
+    return res.status(200).json({
+      ok: true,
+      data: formatSearchUser(searchResults),
+      message: "These are the user that I could found",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      message: "Unable to search User",
+    });
+  }
+};
+
 module.exports = {
   getTopUsers,
   sendFriendRequest,
@@ -330,4 +349,5 @@ module.exports = {
   getUserFriends,
   unlinkUser,
   getUser,
+  searchUser,
 };
