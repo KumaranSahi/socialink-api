@@ -320,12 +320,10 @@ const searchUser = async (req, res) => {
   const { userToSearch } = req.params;
   const user = req.user;
   try {
-    const searchResults = await User.find(
-      {
-        name: { $regex: userToSearch, $options: "i" },
-        _id: { $ne: user._id } ,
-      },
-    ).sort({ posts: -1 });
+    const searchResults = await User.find({
+      name: { $regex: userToSearch.trim(), $options: "i" },
+      _id: { $ne: user._id },
+    }).sort({ posts: -1 });
     return res.status(200).json({
       ok: true,
       data: formatSearchUser(searchResults),

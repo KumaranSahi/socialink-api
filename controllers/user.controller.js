@@ -6,6 +6,7 @@ const {
   confirmPasswordCheck,
 } = require("../utils/userUtils");
 const { User } = require("../models");
+const { cloudinary } = require("../config/cloudinary");
 
 const signupUser = async (req, res) => {
   const { name, email, password, image, DOB } = req.body;
@@ -24,11 +25,20 @@ const signupUser = async (req, res) => {
       });
     }
     const newPassword = await hashingPasswords(password);
+    let uploadInfo;
+    let imageData;
+    if (image) {
+      uploadInfo = await cloudinary.uploader.upload(image);
+      imageData = {
+        public_id: uploadInfo.public_id,
+        imageUrl: uploadInfo.url,
+      };
+    }
     data = await User.create({
       name: name,
       email: email,
       password: newPassword,
-      image: image,
+      image: imageData,
       DOB: new Date(DOB),
       privacy: false,
     });
@@ -97,7 +107,7 @@ const signinUser = async (req, res) => {
           expiresIn: "24h",
         }),
         userName: user.name,
-        image: user.image,
+        image: user.image.imageUrl,
         userId: user._id,
         bio: user.bio,
         privacy: user.privacy,
@@ -115,8 +125,20 @@ const signinUser = async (req, res) => {
 
 const editUser = async (req, res) => {
   const user = req.user;
-  const { name, bio, password, privacy } = req.body;
+  const { name, bio, password, privacy, image } = req.body;
   try {
+    if (image) {
+      if (user.image.public_id)
+        await cloudinary.uploader.destroy(user.image.public_id);
+      const uploadInfo = await cloudinary.uploader.upload(image);
+      const imageData = {
+        public_id: uploadInfo.public_id,
+        imageUrl: uploadInfo.url,
+      };
+      await user.update({
+        image: imageData,
+      });
+    }
     if (password) {
       const newPassword = await hashingPasswords(password);
       await user.update({
@@ -141,6 +163,7 @@ const editUser = async (req, res) => {
         name: newUser.name,
         bio: newUser.bio,
         privacy: newUser.privacy,
+        image: newUser.image.imageUrl,
       },
     });
   } catch (error) {

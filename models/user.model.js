@@ -16,7 +16,12 @@ const userSchema = new Schema(
       required: true,
     },
     image: {
-      type: String,
+      public_id: {
+        type: String,
+      },
+      imageUrl: {
+        type: String,
+      },
     },
     DOB: {
       type: Date,
