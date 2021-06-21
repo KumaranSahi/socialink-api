@@ -10,7 +10,7 @@ const PORT = 8000;
 app.use(cors());
 app.use(express.json());
 
-const passportJWT = require("./Config/passport");
+const passportJWT = require("./config/passport");
 
 app.use("/api", router);
 
