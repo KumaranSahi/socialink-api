@@ -20,7 +20,7 @@ const getPostContentLikesAndComments = (posts, { name, image, _id }) => {
           postLikes.push({
             likeId: likeId,
             likeUserName: likeUserName,
-            likeUserImage: likeUserImage,
+            likeUserImage: likeUserImage.imageUrl,
             likeUserId: likeUserId,
           })
       );
@@ -41,18 +41,18 @@ const getPostContentLikesAndComments = (posts, { name, image, _id }) => {
             commentContent: commentContent,
             commentUserName: commentUserName,
             createdAt: createdAt,
-            commentUserImage: commentUserImage,
+            commentUserImage: commentUserImage.imageUrl,
             commentUserId: commentUserId,
             commentEdited: commentEdited,
           })
       );
       userPosts.push({
         userName: name,
-        userImage: image,
+        userImage: image.imageUrl,
         postUserId: _id,
         postId: postId,
         content: content,
-        image: postImage,
+        image: postImage.imageUrl,
         createdAt: createdAt,
         likes: postLikes,
         comments: postComments,

@@ -7,7 +7,12 @@ const postSchema = new Schema(
       required: true,
     },
     image: {
-      type: String,
+      public_id: {
+        type: String,
+      },
+      imageUrl: {
+        type: String,
+      },
     },
     likes: [
       {

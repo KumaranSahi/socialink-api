@@ -1,5 +1,6 @@
 const { Post, Like, User } = require("../models");
 const { getPostContentLikesAndComments } = require("../utils/postUtils");
+const { cloudinary } = require("../config/cloudinary");
 
 const getFeedPosts = async (req, res) => {
   const user = req.user;
@@ -68,63 +69,11 @@ const getUserPosts = async (req, res) => {
         },
       ],
     });
-    const userPosts = [];
-    populatedUser.posts.forEach(
-      ({
-        _id: postId,
-        content,
-        image: postImage,
-        createdAt,
-        likes,
-        comments,
-        edited,
-      }) => {
-        const postLikes = [];
-        const postComments = [];
-        likes.forEach(
-          ({
-            _id: likeId,
-            by: { name: likeUserName, image: likeUserImage, _id: likeUserId },
-          }) =>
-            postLikes.push({
-              likeId: likeId,
-              likeUserName: likeUserName,
-              likeUserImage: likeUserImage,
-              likeUserId: likeUserId,
-            })
-        );
-        comments.forEach(
-          ({
-            _id: commentId,
-            content: commentContent,
-            edited: commentEdited,
-            by: {
-              name: commentUserName,
-              image: commentUserImage,
-              _id: commentUserId,
-            },
-          }) =>
-            postComments.push({
-              commentId: commentId,
-              commentContent: commentContent,
-              commentUserName: commentUserName,
-              commentUserImage: commentUserImage,
-              commentUserId: commentUserId,
-              commentEdited: commentEdited,
-            })
-        );
-        userPosts.push({
-          postId: postId,
-          content: content,
-          image: postImage,
-          createdAt: createdAt,
-          likes: postLikes,
-          comments: postComments,
-          postEdited: edited,
-        });
-      }
-    );
-
+    const userPosts = getPostContentLikesAndComments(populatedUser.posts, {
+      name: user.name,
+      image: user.image,
+      _id: user._id,
+    });
     return res.status(200).json({
       ok: true,
       message: "Have your posts",
@@ -143,9 +92,18 @@ const createPost = async (req, res) => {
   const user = req.user;
   const { content, image } = req.body;
   try {
+    let uploadInfo;
+    let imageData;
+    if (image) {
+      uploadInfo = await cloudinary.uploader.upload(image);
+      imageData = {
+        public_id: uploadInfo.public_id,
+        imageUrl: uploadInfo.url,
+      };
+    }
     const newPost = await Post.create({
       content: content,
-      image: image,
+      image: imageData,
       by: user._id,
     });
     user.posts.push(newPost._id);
@@ -181,6 +139,8 @@ const deletePost = async (req, res) => {
     });
     await user.update({ $pull: { posts: post._id } });
     await user.save();
+    if (post.image.public_id)
+      await cloudinary.uploader.destroy(post.image.public_id);
     await post.remove();
     return res.status(201).json({
       ok: true,
