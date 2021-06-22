@@ -30,7 +30,7 @@ const getTopUsers = async (req, res) => {
         .map(({ _id, name, image }) => ({
           userId: _id,
           name: name,
-          image: image.imageUrl,
+          image: image ? image.imageUrl : null,
         })),
     });
   } catch (error) {
@@ -139,7 +139,7 @@ const getUserRequests = async (req, res) => {
         requestId: requestId,
         userId: userId,
         name: name,
-        image: image.imageUrl,
+        image: image ? image.imageUrl : null,
       })
     );
     const receivedRequests = populatedUser.receivedRequests.map(
@@ -147,7 +147,7 @@ const getUserRequests = async (req, res) => {
         requestId: requestId,
         userId: userId,
         name: name,
-        image: image.imageUrl,
+        image: image ? image.imageUrl : null,
       })
     );
 
@@ -230,7 +230,9 @@ const getUser = async (req, res) => {
         data: {
           foundUserId: requiredUser._id,
           foundUserName: requiredUser.name,
-          foundUserImage: requiredUser.image.imageUrl,
+          foundUserImage: requiredUser.image
+            ? requiredUser.image.imageUrl
+            : null,
           foundUserBio: requiredUser.bio,
           foundUserPostCount: requiredUser.posts.length,
           foundUserFriends: userFriends,
@@ -253,7 +255,7 @@ const getUser = async (req, res) => {
         data: {
           foundUserId: requiredUser._id,
           foundUserName: requiredUser.name,
-          foundUserImage: requiredUser.image.imageUrl,
+          foundUserImage: requiredUser.image ? image.imageUrl : null,
           foundUserBio: requiredUser.bio,
           foundUserPostCount: requiredUser.posts.length,
           foundUserFriends: userFriends,
@@ -277,7 +279,7 @@ const getUser = async (req, res) => {
         data: {
           foundUserId: requiredUser._id,
           foundUserName: requiredUser.name,
-          foundUserImage: requiredUser.image.imageUrl,
+          foundUserImage: requiredUser.image ? image.imageUrl : null,
           foundUserBio: requiredUser.bio,
           foundUserPostCount: requiredUser.posts.length,
           foundUserFriends: userFriends,
@@ -296,7 +298,7 @@ const getUser = async (req, res) => {
       data: {
         foundUserId: requiredUser._id,
         foundUserName: requiredUser.name,
-        foundUserImage: requiredUser.image.imageUrl,
+        foundUserImage: requiredUser.image ? image.imageUrl : null,
         foundUserBio: requiredUser.bio,
         foundUserPostCount: requiredUser.posts.length,
         foundUserFriends: userFriends,

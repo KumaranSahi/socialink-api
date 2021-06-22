@@ -107,7 +107,7 @@ const signinUser = async (req, res) => {
           expiresIn: "24h",
         }),
         userName: user.name,
-        image: user.image.imageUrl,
+        image: user.image ? user.image.imageUrl : null,
         userId: user._id,
         bio: user.bio,
         privacy: user.privacy,
@@ -163,7 +163,7 @@ const editUser = async (req, res) => {
         name: newUser.name,
         bio: newUser.bio,
         privacy: newUser.privacy,
-        image: newUser.image.imageUrl,
+        image: newUser.image ? image.imageUrl : null,
       },
     });
   } catch (error) {
