@@ -4,10 +4,12 @@ const passport = require("passport");
 
 //middlewares
 
-const postMiddleware = require("../middleware/post.middleware");
-const requestMiddleware = require("../middleware/request.middleware");
-const likeMiddleware = require("../middleware/like.middleware");
-const commentMiddleware = require("../middleware/comment.middleware");
+const {
+  postMiddleware,
+  commentMiddleware,
+  likeMiddleware,
+  requestMiddleware,
+} = require("../middleware");
 
 //controller
 
