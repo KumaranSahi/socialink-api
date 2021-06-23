@@ -11,10 +11,12 @@ const commentMiddleware = require("../middleware/comment.middleware");
 
 //controller
 
-const userController = require("../controllers/user.controller");
-const postController = require("../controllers/post.controller");
-const friendController = require("../controllers/friend.controller");
-const likesAndCommentsController = require("../controllers/likeAndComment.controller");
+const {
+  userController,
+  friendController,
+  likesAndCommentsController,
+  postController,
+} = require("../controllers");
 
 //User routes
 
