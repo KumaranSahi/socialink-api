@@ -163,7 +163,7 @@ const editUser = async (req, res) => {
         name: newUser.name,
         bio: newUser.bio,
         privacy: newUser.privacy,
-        image: newUser.image ? image.imageUrl : null,
+        image: newUser.image ? newUser.image.imageUrl : null,
       },
     });
   } catch (error) {
