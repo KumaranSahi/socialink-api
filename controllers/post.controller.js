@@ -35,11 +35,12 @@ const getFeedPosts = async (req, res) => {
         }),
       ];
     });
+    const sortedPosts = feedPosts.sort((a, b) => b.createdAt - a.createdAt);
 
     return res.status(200).json({
       ok: true,
       message: "Have some feed posts",
-      data: feedPosts,
+      data: sortedPosts,
     });
   } catch (error) {
     console.log(error);
