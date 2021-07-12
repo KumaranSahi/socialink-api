@@ -255,7 +255,9 @@ const getUser = async (req, res) => {
         data: {
           foundUserId: requiredUser._id,
           foundUserName: requiredUser.name,
-          foundUserImage: requiredUser.image ? image.imageUrl : null,
+          foundUserImage: requiredUser.image
+            ? requiredUser.image.imageUrl
+            : null,
           foundUserBio: requiredUser.bio,
           foundUserPostCount: requiredUser.posts.length,
           foundUserFriends: userFriends,
