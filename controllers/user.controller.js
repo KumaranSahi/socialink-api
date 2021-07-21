@@ -127,17 +127,19 @@ const editUser = async (req, res) => {
   const user = req.user;
   const { name, bio, password, privacy, image } = req.body;
   try {
-    if (image) {
+    if (image && !image.includes("res.cloudinary.com/conclave/image")) {
       if (user.image.public_id)
         await cloudinary.uploader.destroy(user.image.public_id);
-      const uploadInfo = await cloudinary.uploader.upload(image);
-      const imageData = {
-        public_id: uploadInfo.public_id,
-        imageUrl: uploadInfo.url,
-      };
-      await user.update({
-        image: imageData,
-      });
+      if (image.length > 0) {
+        const uploadInfo = await cloudinary.uploader.upload(image);
+        const imageData = {
+          public_id: uploadInfo.public_id,
+          imageUrl: uploadInfo.url,
+        };
+        await user.update({
+          image: imageData,
+        });
+      }
     }
     if (password) {
       const newPassword = await hashingPasswords(password);
