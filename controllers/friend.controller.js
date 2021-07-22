@@ -220,6 +220,7 @@ const getUser = async (req, res) => {
     if (!requiredUser.privacy || isFriend) {
       const populatedUser = await requiredUser.execPopulate({
         path: "friends",
+        path: "posts",
       });
       userFriends = formatUserFriends(populatedUser.friends);
     }
@@ -308,7 +309,7 @@ const getUser = async (req, res) => {
         foundUserFriends: userFriends,
         foundUserFriendsCount: requiredUser.friends.length,
         foundUserPrivacy: requiredUser.privacy,
-        friendStatus: {
+        friend: {
           friendStatus: "STRANGER",
         },
       },
