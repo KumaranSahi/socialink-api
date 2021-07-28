@@ -114,9 +114,17 @@ const createPost = async (req, res) => {
       message: "New post created",
       data: {
         content: newPost.content,
-        image: newPost.image,
+        image:
+          newPost.image && newPost.image.length > 0
+            ? newPost.image.imageUrl
+            : null,
         postId: newPost._id,
         createdAt: newPost.createdAt,
+        likes: [],
+        comments: [],
+        userName: user.name,
+        userImage: user.image ? user.image.imageUrl : null,
+        postUserId: user._id,
       },
     });
   } catch (error) {
